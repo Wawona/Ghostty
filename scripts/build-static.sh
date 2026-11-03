@@ -108,9 +108,12 @@ else
   cp -f "${LIB}" "${OUT}/libghostty.a"
 fi
 
-if ! nm -gU "${OUT}/libghostty.a" 2>/dev/null | grep -q 'ghostty_init'; then
-  nm -g "${OUT}/libghostty.a" 2>/dev/null | grep -q 'ghostty_init' \
-    || { echo "FAIL: ghostty_init missing" >&2; exit 1; }
+# Apple nm often exits non-zero on rustc LLVM attrs; still prints symbols.
+if ! (nm -g "${OUT}/libghostty.a" 2>/dev/null || true) | grep -q 'ghostty_init'; then
+  if ! grep -a -q 'ghostty_init' "${OUT}/libghostty.a"; then
+    echo "FAIL: ghostty_init missing in ${OUT}/libghostty.a" >&2
+    exit 1
+  fi
 fi
 echo "OK ${OUT}/libghostty.a"
 ls -la "${OUT}/libghostty.a"

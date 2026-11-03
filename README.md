@@ -1,52 +1,44 @@
-# Wawona Ghostty (libghostty)
+# libghostty-rs (Wawona Terminal grid)
 
-L3′ terminal **grid** for Wawona Terminal. Flake input: `wwn-ghostty`.
+L3′ flake input: `wwn-ghostty`.
 
-**Wawona Terminal** = Wawona native UI chrome (windows, PTY, Machines,
-ToolbarKeys) + **Rust libghostty** grid. One surface for local shell, SSH,
-and the Relay guest console on macOS, iOS, iPadOS, tvOS, watchOS, visionOS,
-Android, and Linux.
+**Wawona Terminal** = **UniFFI Rust (`libghostty-rs`)** + **native UI** on every
+host (same split as Wawona domain UniFFI and `ToolbarKeys`).
 
-## Product shape
+| Layer | Owner |
+|-------|--------|
+| Grid / VT / session | Rust UniFFI (`GhosttySurface` / `TerminalSession`) |
+| Paint + chrome | Native UI: AppKit, UIKit, SwiftUI, WatchKit/SpriteKit, Jetpack Compose, GTK |
+| Bytes | `wawona-pty` / Relay |
+| Toolbar keys | `github.com/Wawona/ToolbarKeys` (separate UniFFI) |
 
-| Item | Rule |
-|------|------|
-| Language | **Rust** (`staticlib` `libghostty.a`) |
-| Exports | `ghostty_*` only (C ABI for Swift / JNI / GTK) |
-| VT | `wawona-terminal` (`github.com/Wawona/Terminal`) |
-| Apple-mobile min OS | **13.0** |
-| Store IPA | No product `.dylib`. No published GhosttyKit (iOS 17) |
-| watchOS | Software cells → SpriteKit (no Metal) |
-| Android / Linux | Host OpenGL / GTK paints cells |
+## Layout (ToolbarKeys twin)
 
-Zig upstream under `upstream/` is reference-only (Rootshell / Ghostty MIT).
-Product paint path is this Rust crate. Do not link Zig objects into Wawona.
-
-## Build
-
-```bash
-./scripts/build-static.sh macos
-./scripts/build-static.sh ios
-./scripts/build-static.sh ios-sim
-# also: tvos, visionos, watchos, android, linux, linux-x86_64, macos-x86_64
+```text
+Ghostty/                    # this repo (product name + packaging)
+  include/ghostty.h         # optional C ABI (same Term; not the product contract)
+  scripts/build-static.sh
+Terminal/                   # sibling: rust crate + native UI trees
+  src/                      # UniFFI libghostty-rs (screen + GhosttySurface)
+  apple/Terminal/           # SwiftUI / UIKit / AppKit views
+  android/…/WawonaTerminalText.kt
 ```
 
-Outputs: `zig-out/<abi>/libghostty.a` + `include/ghostty.h` (path kept for
-Wawona staging; artifact is Rust).
+Wawona stages `apple/Terminal` into `.nix-deps` the same way it stages
+`ToolbarKeys/apple/Keyboard`.
+
+## Product contract
+
+1. Rust owns cells, feed, reply, title, paste, pointer, kitty placements.
+2. Hosts call **UniFFI** (`GhosttySurface` / `TerminalSession.lines()`).
+3. Each OS paints with its native framework. No second VT in Swift/Kotlin.
+4. Apple-mobile: static archive, deployment target **13.0**. No GhosttyKit.
+5. No product `.dylib` in store IPA.
 
 ## Credits
 
-- Name and terminal-host role inspired by Ghostty. Copyright (c) 2024
-  Mitchell Hashimoto, Ghostty contributors. MIT.
-- iOS embed UX starting point: Rootshell. Copyright (c) 2026 Rootshell LLC,
-  Kit Knox. MIT.
-- VT screen: `github.com/Wawona/Terminal` (MIT).
+- Name/role: Ghostty MIT (Mitchell Hashimoto et al.)
+- iOS embed UX start: Rootshell MIT (Kit Knox)
+- VT: this org’s Rust (`Wawona/Terminal`)
 
-Toolbar keys: `github.com/Wawona/ToolbarKeys`. Relay stays the VM engine.
-
-## Hard rejects
-
-- Linking published GhosttyKit XCFramework into store IPA
-- Raising Wawona's iOS floor for this archive
-- Shipping a product Ghostty `.dylib` on Apple-mobile
-- A second permanent VT paint engine beside this grid (no TermGpu atlas)
+Zig under `upstream/` is reference-only. Not the product link line.
