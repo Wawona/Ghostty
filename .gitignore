@@ -1,0 +1,5 @@
+target/
+zig-out/
+upstream/
+bootstrap/*.o
+.DS_Store
