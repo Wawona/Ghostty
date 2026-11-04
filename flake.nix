@@ -54,6 +54,13 @@
             }
           else
             null;
+        libghosttyMacosDrawProof =
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            pkgs.callPackage ./nix/libghostty-macos-draw-proof.nix {
+              libghosttyMacos = libghosttyMacos;
+            }
+          else
+            null;
       in
       {
         packages = {
@@ -66,13 +73,25 @@
           libghostty-macos = libghosttyMacos;
           # Zig probe: same flags + build.log under $out.
           libghostty-macos-probe = libghosttyMacosProbe;
+          # Link + ghostty_surface_draw against NSView. Separate from tip.
+          libghostty-macos-draw-proof = libghosttyMacosDrawProof;
         };
 
-        # Doc + patch + prebuilt metallib presence. Do not claim GhosttyGpu retired.
+        apps = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+          libghostty-macos-draw-proof = {
+            type = "app";
+            program = "${libghosttyMacosDrawProof}/bin/libghostty-macos-draw-proof";
+          };
+        };
+
+        # Doc + patch + prebuilt metallib + draw-proof source. GhosttyGpu still paint.
         checks.metal-surface-doc = pkgs.runCommand "wwn-ghostty-metal-doc" { } ''
           test -f ${./docs/METAL-SURFACE.md}
           grep -q 'TermGpu / GhosttyGpu still owns paint' ${./docs/METAL-SURFACE.md}
+          grep -q 'ABI gap' ${./docs/METAL-SURFACE.md}
           test -f ${./nix/libghostty-macos.nix}
+          test -f ${./nix/libghostty-macos-draw-proof.nix}
+          test -f ${./nix/draw-proof/main.m}
           test -f ${./nix/patches/darwin-install-ghostty-internal-static.patch}
           test -f ${./nix/patches/prebuilt-metallib-option.patch}
           test -f ${./nix/patches/sdk14-kCVPixelFormatType_30RGB_r210.patch}

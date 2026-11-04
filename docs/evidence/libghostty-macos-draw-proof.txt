@@ -1,0 +1,23 @@
+# libghostty-macos draw proof (Phase 5 slice)
+date=2026-11-03
+host=darwin aarch64
+ghostty_tree=local development tip (post f9fbcae)
+
+## Commands
+nix build .#libghostty-macos --accept-flake-config
+nix build .#libghostty-macos-draw-proof -L --accept-flake-config
+./result/bin/libghostty-macos-draw-proof
+
+## Observed
+ghostty_init=0
+draw_ok surface=…
+PASS libghostty-macos draw proof
+
+nm -gU result/bin/libghostty-macos-draw-proof | rg 'ghostty_surface_(new|draw)'
+→ T _ghostty_surface_draw
+→ T _ghostty_surface_new
+
+## Product tip
+Wawona.app / Terminal tip still paints with GhosttyGpu.
+Cannot dual-link Rust libwawona_terminal.a + Zig libghostty-internal.a
+(same ghostty_surface_* names, different ABI). See docs/METAL-SURFACE.md.
