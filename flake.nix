@@ -28,14 +28,42 @@
       let
         pkgs = import nixpkgs { inherit system; };
         libghosttyVt = ghostty.packages.${system}.libghostty-vt;
+        # Same locked Ghostty tree as inputs.ghostty (full source, not vt fileset).
+        ghosttySrc =
+          let
+            lock = builtins.fromJSON (builtins.readFile ./flake.lock);
+            g = lock.nodes.ghostty.locked;
+          in
+          builtins.fetchTree {
+            type = g.type;
+            owner = g.owner;
+            repo = g.repo;
+            rev = g.rev;
+          };
+        libghosttyMacos =
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            pkgs.callPackage ./nix/libghostty-macos.nix { }
+          else
+            null;
+        libghosttyMacosProbe =
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            pkgs.callPackage ./nix/libghostty-macos-probe.nix {
+              inherit ghosttySrc;
+            }
+          else
+            null;
       in
       {
         packages = {
           default = libghosttyVt;
           # Available today: VT archive only (no Metal paint).
           libghostty-vt = libghosttyVt;
-          # Planned: full surface staticlib for macOS / ios / …
-          # libghostty-macos = …;  see docs/METAL-SURFACE.md
+        }
+        // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+          # Fail closed until Metal GhosttyLib installs (METAL-SURFACE.md).
+          libghostty-macos = libghosttyMacos;
+          # Zig probe: captures build.log; expect PROBE_FAIL until Darwin install lands.
+          libghostty-macos-probe = libghosttyMacosProbe;
         };
 
         # Fail closed until Metal recipe exists. Agents must not invent a
@@ -43,6 +71,8 @@
         checks.metal-surface-doc = pkgs.runCommand "wwn-ghostty-metal-doc" { } ''
           test -f ${./docs/METAL-SURFACE.md}
           grep -q 'TermGpu / GhosttyGpu still owns paint' ${./docs/METAL-SURFACE.md}
+          grep -q 'libghostty-macos fails closed' ${./docs/METAL-SURFACE.md}
+          test -f ${./nix/libghostty-macos.nix}
           touch $out
         '';
       }

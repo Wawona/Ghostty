@@ -54,9 +54,13 @@ See `docs/METAL-SURFACE.md`.
 ## Nix
 
 ```bash
-nix build .#libghostty-vt
-# Metal / full surface packages: not green yet (see docs/METAL-SURFACE.md)
+nix build .#libghostty-vt              # green: VT only
+nix build .#libghostty-macos           # fail closed until Metal GhosttyLib
+nix build .#libghostty-macos-probe     # Zig attempt + $out/build.log
 ```
 
-Wawona consumes this as `inputs.wwn-ghostty` once packages land. Until then
-Wawona also keeps `inputs.ghostty` (upstream) for Terminal VT.
+See `docs/METAL-SURFACE.md`. Do not confuse Terminal's Rust
+`libwawona_terminal.a` alias named `libghostty.a` with Metal GhosttyLib.
+
+Wawona consumes this as `inputs.wwn-ghostty`. Until Metal lands, Wawona also
+keeps `inputs.ghostty` (upstream) for Terminal VT + GhosttyGpu interim paint.

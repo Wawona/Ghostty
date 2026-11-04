@@ -1,0 +1,28 @@
+got build log for '/nix/store/cspczv4vlacph4xy140qgsbbpbysb5j4-libghostty-macos-probe-0.1.1-probe.drv' from 'daemon'
+Running phase: unpackPhase
+@nix { "action": "setPhase", "phase": "unpackPhase" }
+unpacking source archive /nix/store/845skyrkk1m00q3sa2x2dv0024yh8j7m-source
+source root is source
+Running phase: patchPhase
+@nix { "action": "setPhase", "phase": "patchPhase" }
+Running phase: updateAutotoolsGnuConfigScriptsPhase
+@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
+Running phase: buildPhase
+@nix { "action": "setPhase", "phase": "buildPhase" }
+install
++- run /bin/ln
+   +- run /bin/ln
+      +- install generated to libghostty-vt.0.1.0.dylib
+         +- link libghostty-vt with Apple ld (libghostty-vt.0.1.0.dylib) w
+Warning: supplying the --target arm64-apple-macosx13.0.0 != arm64-apple-darwin argument to a nix-wrapped compiler may not work correctly - cc-wrapper is currently not designed with multi-target compilers in mind. You may want to use an un-wrapped compiler instead.
+clang: warning: overriding '-mmacos-version-min=14.0' option with '-target arm64-apple-macosx13.0.0' [-Woverriding-option]
+failed command: /usr/bin/xcrun --sdk macosx clang -fuse-ld=ld -target arm64-apple-macosx13.0.0 -dynamiclib -Wl,-all_load -Wl,-dead_strip -Wl,-headerpad_max_install_names -Wl,-exported_symbols_list,./.zig-cache/o/3d3997c3785b49ebcec56a9c712ce359/libghostty-vt.exports ./.zig-cache/o/8088177ab2e05aeeb6358a81aa48efaf/libghostty-vt-fat.a -install_name @rpath/libghostty-vt.dylib -current_version 0.1.0 -compatibility_version 1.0.0 -o ./.zig-cache/o/7495c5b43470fb84b14521cf9753f9d9/libghostty-vt.0.1.0.dylib
+
+EXIT=0
+--- zig-out (non-vt archives) ---
+zig-out/lib/libghostty-vt.a
+zig-out/lib/libghostty-vt.0.1.0.dylib
+--- zig-cache ghostty-internal ---
+--- zig-cache libghostty (exclude vt) ---
+PROBE_FAIL: no GhosttyLib static archive in zig-out (VT-only or Darwin skip-install).
+See docs/METAL-SURFACE.md: Darwin build.zig skips lib_static.install.
