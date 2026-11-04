@@ -25,23 +25,23 @@ atlas.
 | `wwn-ghostty#libghostty-macos-probe` | Same flags + `build.log` under `$out` | Evidence |
 | `Terminal` `out/macos/libghostty.a` | Alias of `libwawona_terminal.a` (Rust UniFFI) | No (GhosttyGpu paints) |
 
-## ABI gap (why tip cannot dual-link yet)
+## ABI rename (Phase 5 done)
 
-| Symbol | Rust Terminal (`libwawona_terminal.a`) | Zig GhosttyLib (`libghostty-internal.a`) |
-|--------|----------------------------------------|------------------------------------------|
-| `ghostty_surface_new` | `(u32 cols, u32 rows)` | `(ghostty_app_t, ghostty_surface_config_s*)` |
-| `ghostty_surface_free` | free VT engine | free GhosttyLib surface |
-| `ghostty_init` | no-op / VT | full GhosttyLib init |
+| Role | Symbols | Archive |
+|------|---------|---------|
+| Rust VT (tip paint path) | `wwn_term_*` only | `libwawona_terminal.a` / in `libwawona.a` |
+| Zig GhosttyLib (Metal) | `ghostty_surface_*` / `ghostty_init` | `libghostty-internal.a` |
 
-Same C names. Different signatures. Linking both into `Wawona.app` = duplicate
-symbol or wrong ABI at runtime. Product paint swap must:
+Rust no longer exports `ghostty_surface_*`. Tip may dual-link Zig archive
+(`WAWONA_LINK_LIBGHOSTTY=1`) without duplicate symbols. Product paint swap
+still needs:
 
-1. Stop exporting Rust `ghostty_surface_*` (or rename to `wwn_term_*` only).
-2. Host `ghostty_app_new` + runtime callbacks + `nsview` in surface config.
-3. Call `ghostty_surface_draw` instead of `GhosttyGpuView` atlas.
+1. Host `ghostty_app_new` + runtime callbacks + `nsview` in surface config.
+2. Call `ghostty_surface_draw` instead of `GhosttyGpuView` atlas.
 
-Until then: tip keeps **GhosttyGpu** (fallback flag
-`WAWONA_GHOSTTY_GPU=1` / default on). Draw proof stays a **separate** binary.
+Until Metal host wires: tip keeps **GhosttyGpu** (fallback flag
+`WAWONA_GHOSTTY_GPU=1` / default on). Draw proof stays a **separate** binary
+or optional tip link without paint swap.
 
 ## Phase 5 patches (this repo)
 
@@ -63,7 +63,7 @@ Until then: tip keeps **GhosttyGpu** (fallback flag
 
 1. **Wawona tip still GhosttyGpu.** Archive links in draw-proof only.
 2. **Full GhosttyLib rejects iOS** (`Config.zig`: only `-Demit-lib-vt`).
-3. **Name collision** with Rust UniFFI `libghostty.a` alias.
+3. ~~Name collision~~ Phase 5: Rust VT is `wwn_term_*`. Alias `libghostty.a` still not Metal.
 
 ## Prove (Phase 5 green)
 

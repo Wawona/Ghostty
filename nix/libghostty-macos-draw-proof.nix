@@ -1,6 +1,6 @@
 # Link + one draw of Zig GhosttyLib against an NSView.
-# Separate binary: cannot dual-link into Wawona tip with Rust
-# libwawona_terminal.a (same `ghostty_surface_*` names, different ABI).
+# Tip may dual-link after Phase 5 (Rust VT is wwn_term_* only). This proof
+# binary stays separate until Metal host wires nsview paint.
 {
   lib,
   stdenv,
