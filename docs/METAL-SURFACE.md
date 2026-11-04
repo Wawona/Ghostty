@@ -9,7 +9,7 @@ atlas.
 | Piece | Owner | Status |
 |-------|--------|--------|
 | VT / cell buffer | upstream `libghostty-vt` via flake input `ghostty` + `Terminal` UniFFI | Shipping in `nix run .#terminal` |
-| Glyph / GPU paint | Wawona `GhosttyGpuView` (CoreText stamp + MTL atlas) | **Interim.** Plan forbids more atlas patches |
+| Glyph / GPU paint | `GhosttySurfaceHost`: Zig `ghostty_surface_draw` when `WAWONA_LINK_LIBGHOSTTY=1`; else `GhosttyGpuView` atlas | Zig path opt-in. Atlas **fallback**, not retired |
 | PTY / Machines chrome | Wawona L4 | Keep |
 | Nix VT package | `nix build .#libghostty-vt` (re-export) | Green on Darwin |
 | Nix GhosttyLib static | `nix build .#libghostty-macos` | Green (~26 MiB `libghostty-internal.a`) |
@@ -20,7 +20,7 @@ atlas.
 | Attr / artifact | What it is | Metal paint in Wawona UI? |
 |-----------------|------------|---------------------------|
 | `wwn-ghostty#libghostty-vt` | Upstream VT staticlib (Zig 0.17) | No |
-| `wwn-ghostty#libghostty-macos` | GhosttyLib `ghostty-internal.a` (+ `libghostty.a` alias) | Archive yes; **UI still GhosttyGpu** |
+| `wwn-ghostty#libghostty-macos` | GhosttyLib `ghostty-internal.a` (+ `libghostty.a` alias) | Tip `WAWONA_LINK_LIBGHOSTTY=1` → `GhosttySurfaceHost` Zig paint |
 | `wwn-ghostty#libghostty-macos-draw-proof` | Separate ObjC binary links archive + draws | Proof only. Not tip |
 | `wwn-ghostty#libghostty-macos-probe` | Same flags + `build.log` under `$out` | Evidence |
 | `Terminal` `out/macos/libghostty.a` | Alias of `libwawona_terminal.a` (Rust UniFFI) | No (GhosttyGpu paints) |
@@ -33,15 +33,13 @@ atlas.
 | Zig GhosttyLib (Metal) | `ghostty_surface_*` / `ghostty_init` | `libghostty-internal.a` |
 
 Rust no longer exports `ghostty_surface_*`. Tip may dual-link Zig archive
-(`WAWONA_LINK_LIBGHOSTTY=1`) without duplicate symbols. Product paint swap
-still needs:
+(`WAWONA_LINK_LIBGHOSTTY=1`) without duplicate symbols. Phase 5 paint slice:
 
-1. Host `ghostty_app_new` + runtime callbacks + `nsview` in surface config.
-2. Call `ghostty_surface_draw` instead of `GhosttyGpuView` atlas.
-
-Until Metal host wires: tip keeps **GhosttyGpu** (fallback flag
-`WAWONA_GHOSTTY_GPU=1` / default on). Draw proof stays a **separate** binary
-or optional tip link without paint swap.
+1. `GhosttySurfaceHost` + C bridge: `ghostty_app_new` + `nsview` +
+   `ghostty_surface_draw` when flag on.
+2. Flag off / archive missing: **GhosttyGpu** atlas fallback (not retired).
+3. Gap: Zig surface owns its own shell PTY. Machines `wwn_term_*` feed is
+   not yet the Zig paint source. Unified PTY remains follow-up.
 
 ## Phase 5 patches (this repo)
 
@@ -61,9 +59,10 @@ or optional tip link without paint swap.
 
 ## Remaining blockers (not Phase 5 product-done)
 
-1. **Wawona tip still GhosttyGpu.** Archive links in draw-proof only.
+1. **PTY unify.** Zig paint path runs GhosttyLib shell, not Machines `wwn_term_*` bytes.
 2. **Full GhosttyLib rejects iOS** (`Config.zig`: only `-Demit-lib-vt`).
 3. ~~Name collision~~ Phase 5: Rust VT is `wwn_term_*`. Alias `libghostty.a` still not Metal.
+4. **GhosttyGpu not retired.** Default tip (flag off) still atlas.
 
 ## Prove (Phase 5 green)
 
@@ -78,7 +77,8 @@ nix build .#libghostty-macos-draw-proof -L
 nm -gU result/bin/libghostty-macos-draw-proof | rg 'ghostty_surface_(new|draw)'
 ```
 
-Until Wawona tip swaps paint: **TermGpu / GhosttyGpu still owns paint.**
+Default tip (no flag): **GhosttyGpu owns paint.** Flag on: Zig
+`GhosttySurfaceHost`. GhosttyGpu not retired.
 
 ## Not this work
 
