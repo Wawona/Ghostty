@@ -1,0 +1,21 @@
+--- a/build.zig
++++ b/build.zig
+@@ -223,9 +223,15 @@
+         const lib_shared = try buildpkg.GhosttyLib.initShared(b, &deps);
+         const lib_static = try buildpkg.GhosttyLib.initStatic(b, &deps);
+ 
+-        // We shouldn't have this guard but we don't currently
+-        // build on macOS this way ironically so we need to fix that.
+-        if (!config.target.result.os.tag.isDarwin()) {
++        // Darwin historically skipped install because the product path
++        // is XCFramework / Xcode. Static consumers (Wawona) need the
++        // archive when -Demit-xcframework=false -Demit-macos-app=false.
++        if (config.target.result.os.tag.isDarwin()) {
++            if (!config.emit_xcframework and !config.emit_macos_app) {
++                lib_shared.installHeader();
++                lib_static.install("ghostty-internal.a");
++            }
++        } else {
+             lib_shared.installHeader(); // Only need one header
+             if (config.target.result.os.tag == .windows) {
+                 lib_shared.install("ghostty-internal.dll");

@@ -1,0 +1,23 @@
+--- a/src/build/MetallibStep.zig
++++ b/src/build/MetallibStep.zig
+@@ -22,6 +22,20 @@
+ output: LazyPath,
+ 
+ pub fn create(b: *std.Build, opts: Options) ?*MetallibStep {
++    // Wawona/Nix: MetalToolchain is a host cryptex; sandbox builds use a
++    // prebuilt Ghostty.metallib (vendor/) instead of /usr/bin/xcrun metal.
++    if (b.option(bool, "prebuilt-metallib", "Use vendor/Ghostty.metallib (skip metal compiler)") orelse false) {
++        if (opts.target.result.os.tag != .macos) return null;
++        const self = b.allocator.create(MetallibStep) catch @panic("OOM");
++        const wf = b.addWriteFiles();
++        const copied = wf.addCopyFile(b.path("vendor/Ghostty.metallib"), "Ghostty.metallib");
++        self.* = .{
++            .step = &wf.step,
++            .output = copied,
++        };
++        return self;
++    }
++
+     const sdk = switch (opts.target.result.os.tag) {
+         .macos => "macosx",
+         else => return null,

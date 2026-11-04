@@ -42,7 +42,9 @@
           };
         libghosttyMacos =
           if pkgs.stdenv.hostPlatform.isDarwin then
-            pkgs.callPackage ./nix/libghostty-macos.nix { }
+            pkgs.callPackage ./nix/libghostty-macos.nix {
+              inherit ghosttySrc;
+            }
           else
             null;
         libghosttyMacosProbe =
@@ -60,19 +62,25 @@
           libghostty-vt = libghosttyVt;
         }
         // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-          # Fail closed until Metal GhosttyLib installs (METAL-SURFACE.md).
+          # Real GhosttyLib static (Darwin install patch). Paint still GhosttyGpu.
           libghostty-macos = libghosttyMacos;
-          # Zig probe: captures build.log; expect PROBE_FAIL until Darwin install lands.
+          # Zig probe: same flags + build.log under $out.
           libghostty-macos-probe = libghosttyMacosProbe;
         };
 
-        # Fail closed until Metal recipe exists. Agents must not invent a
-        # stub .a and call GhosttyGpu retired.
+        # Doc + patch + prebuilt metallib presence. Do not claim GhosttyGpu retired.
         checks.metal-surface-doc = pkgs.runCommand "wwn-ghostty-metal-doc" { } ''
           test -f ${./docs/METAL-SURFACE.md}
           grep -q 'TermGpu / GhosttyGpu still owns paint' ${./docs/METAL-SURFACE.md}
-          grep -q 'libghostty-macos fails closed' ${./docs/METAL-SURFACE.md}
           test -f ${./nix/libghostty-macos.nix}
+          test -f ${./nix/patches/darwin-install-ghostty-internal-static.patch}
+          test -f ${./nix/patches/prebuilt-metallib-option.patch}
+          test -f ${./nix/patches/sdk14-kCVPixelFormatType_30RGB_r210.patch}
+          test -f ${./nix/prebuilt/Ghostty.metallib}
+          grep -q 'lib_static.install("ghostty-internal.a")' \
+            ${./nix/patches/darwin-install-ghostty-internal-static.patch}
+          grep -q 'prebuilt-metallib' ${./nix/patches/prebuilt-metallib-option.patch}
+          grep -q '30RGB_r210' ${./nix/patches/sdk14-kCVPixelFormatType_30RGB_r210.patch}
           touch $out
         '';
       }

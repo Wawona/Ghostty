@@ -1,0 +1,43 @@
+warning: ignoring untrusted flake configuration setting 'extra-substituters'.
+Pass '--accept-flake-config' to trust it
+warning: ignoring untrusted flake configuration setting 'extra-trusted-public-keys'.
+Pass '--accept-flake-config' to trust it
+these 2 derivations will be built:
+  /nix/store/g2xlzqs91j0156m1dii4dpi8lpagr15a-libghostty-macos-cache-0.1.4-macos.drv
+  /nix/store/qxwv4s2irpgxnba5xixmkam3i7hiyjsl-libghostty-macos-0.1.4-macos.drv
+building '/nix/store/g2xlzqs91j0156m1dii4dpi8lpagr15a-libghostty-macos-cache-0.1.4-macos.drv'...
+building '/nix/store/qxwv4s2irpgxnba5xixmkam3i7hiyjsl-libghostty-macos-0.1.4-macos.drv'...
+libghostty-macos> Running phase: unpackPhase
+libghostty-macos> unpacking source archive /nix/store/845skyrkk1m00q3sa2x2dv0024yh8j7m-source
+libghostty-macos> source root is source
+libghostty-macos> Running phase: patchPhase
+libghostty-macos> applying patch /nix/store/ynd5sdsnfdxpng0v2akpywjy5fyjy61z-darwin-install-ghostty-internal-static.patch
+libghostty-macos> patching file build.zig
+libghostty-macos> applying patch /nix/store/1vrlz0md7n0kg3sv0f1g4dx4jhqvcn23-prebuilt-metallib-option.patch
+libghostty-macos> patching file src/build/MetallibStep.zig
+libghostty-macos> applying patch /nix/store/x5r06mi9jdpiyinn4dn2xkqk1bp2jvwr-sdk14-kCVPixelFormatType_30RGB_r210.patch
+libghostty-macos> patching file pkg/macos/video/pixel_format.zig
+libghostty-macos> Running phase: updateAutotoolsGnuConfigScriptsPhase
+libghostty-macos> Running phase: buildPhase
+libghostty-macos> install
+libghostty-macos> (0mq(B run /bin/ln
+libghostty-macos>    (0mq(B run /bin/ln
+libghostty-macos>       (0mq(B install generated to libghostty-vt.0.1.0.dylib
+libghostty-macos>          (0mq(B link libghostty-vt with Apple ld (libghostty-vt.0.1.0.dylib) w
+libghostty-macos> Warning: supplying the --target arm64-apple-macosx13.0.0 != arm64-apple-darwin argument to a nix-wrapped compiler may not work correctly - cc-wrapper is currently not designed with multi-target compilers in mind. You may want to use an un-wrapped compiler instead.
+libghostty-macos> clang: warning: overriding '-mmacos-version-min=14.0' option with '-target arm64-apple-macosx13.0.0' [-Woverriding-option]
+libghostty-macos> failed command: /usr/bin/xcrun --sdk macosx clang -fuse-ld=ld -target arm64-apple-macosx13.0.0 -dynamiclib -Wl,-all_load -Wl,-dead_strip -Wl,-headerpad_max_install_names -Wl,-exported_symbols_list,./.zig-cache/o/3d3997c3785b49ebcec56a9c712ce359/libghostty-vt.exports ./.zig-cache/o/05e6b880257363716a4781a7ba7fbdd1/libghostty-vt-fat.a -install_name @rpath/libghostty-vt.dylib -current_version 0.1.0 -compatibility_version 1.0.0 -o ./.zig-cache/o/8068dcc139708913ab4b28641c419543/libghostty-vt.0.1.0.dylib
+libghostty-macos> 
+libghostty-macos> install
+libghostty-macos> (0mq(B install generated to ghostty-internal.a
+libghostty-macos>    (0mq(B libsystem override
+libghostty-macos>       (0mq(B libtool ghostty-internal (libghostty-internal-fat.a) w
+libghostty-macos> libtool: warning duplicate member name 'ext.o' from './.zig-cache/o/cb7e0984cb9ac88344993fb8f42ebdf8/12-libghostty-internal-fat.a(ext.o)' and './.zig-cache/o/b79203ff02256148760e23305d641aae/10-libghostty-internal-fat.a(ext.o)'
+libghostty-macos> failed command: libtool -static -o ./.zig-cache/o/16cd230b0e014fc5844bf3500ef87aa3/libghostty-internal-fat.a ./.zig-cache/o/43c9484310944882aa5b86dff35c0b87/0-libghostty-internal-fat.a ./.zig-cache/o/0b07b19a69bf16c15b67b4852d35d9a7/1-libghostty-internal-fat.a ./.zig-cache/o/f5f504372033485bb2d4eb4e2bc83e90/2-libghostty-internal-fat.a ./.zig-cache/o/4948137b66846c42cb0516407632bd39/3-libghostty-internal-fat.a ./.zig-cache/o/f5579d25d1ecb5b87b91620c606f969a/4-libghostty-internal-fat.a ./.zig-cache/o/0ec39cbe37727f6b6e4acbf6c1f38132/5-libghostty-internal-fat.a ./.zig-cache/o/2045f3239c6b848f5c84a983c66ec048/6-libghostty-internal-fat.a ./.zig-cache/o/b7f9a7647b39b4a22d0015c7ed13526b/7-libghostty-internal-fat.a ./.zig-cache/o/f6f58ee10e683913a917ae431b8ab3ac/8-libghostty-internal-fat.a ./.zig-cache/o/7e5e6b5e079f369dcc114bdb502294bb/9-libghostty-internal-fat.a ./.zig-cache/o/b79203ff02256148760e23305d641aae/10-libghostty-internal-fat.a ./.zig-cache/o/1a06103ccad254daf8009a506c05c780/11-libghostty-internal-fat.a ./.zig-cache/o/cb7e0984cb9ac88344993fb8f42ebdf8/12-libghostty-internal-fat.a ./.zig-cache/o/e1d1b1e8c73955e92723aca8a6fb99dc/13-libghostty-internal-fat.a
+libghostty-macos> 
+libghostty-macos> buildPhase completed in 7 minutes 15 seconds
+libghostty-macos> Running phase: installPhase
+libghostty-macos> Running phase: fixupPhase
+libghostty-macos> checking for references to /nix/var/nix/builds/nix-1945-35311590/ in /nix/store/bgp9kyqipzqdkha4rxsmjw6vkmgy733j-libghostty-macos-0.1.4-macos...
+libghostty-macos> patching script interpreter paths in /nix/store/bgp9kyqipzqdkha4rxsmjw6vkmgy733j-libghostty-macos-0.1.4-macos
+libghostty-macos> stripping (with command strip and flags -S) in /nix/store/bgp9kyqipzqdkha4rxsmjw6vkmgy733j-libghostty-macos-0.1.4-macos/lib

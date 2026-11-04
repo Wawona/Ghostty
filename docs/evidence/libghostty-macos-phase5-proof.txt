@@ -1,0 +1,55 @@
+=== libghostty-macos Phase 5 evidence ===
+Wed Nov  4 02:49:31 UTC 2026
+store=/nix/store/bgp9kyqipzqdkha4rxsmjw6vkmgy733j-libghostty-macos-0.1.4-macos
+Permissions Size User Date Modified Name
+dr-xr-xr-x     - root 31 Dec  1969  .
+dr-xr-xr-x     - root 31 Dec  1969  ..
+.r--r--r--   26M root 31 Dec  1969  libghostty-internal.a
+lrwxr-xr-x     - root 31 Dec  1969  libghostty.a -> libghostty-internal.a
+libghostty-macos
+archive=zig-out/lib/ghostty-internal.a
+size=151085328
+note=Zig GhosttyLib static. GhosttyGpu still owns Wawona paint until surface swap.
+--- nm T _ghostty_surface* / metal ---
+0000000000198bc0 T _ghostty_init
+00000000003ff184 T _ghostty_inspector_metal_init
+00000000003ffe0c T _ghostty_inspector_metal_render
+00000000003ff158 T _ghostty_inspector_metal_shutdown
+000000000034e1a8 T _ghostty_surface_app
+0000000000302bc0 T _ghostty_surface_binding_action
+00000000002f7e0c T _ghostty_surface_complete_clipboard_request
+00000000003f63a0 T _ghostty_surface_config_new
+00000000002f68dc T _ghostty_surface_deny_clipboard_request
+0000000000332394 T _ghostty_surface_draw
+000000000033224c T _ghostty_surface_foreground_pid
+000000000034e1d8 T _ghostty_surface_free
+0000000000342d6c T _ghostty_surface_free_text
+0000000000343d2c T _ghostty_surface_has_selection
+000000000031bd88 T _ghostty_surface_ime_point
+000000000034de54 T _ghostty_surface_inherited_config
+00000000002f64bc T _ghostty_surface_inspector
+000000000032ad24 T _ghostty_surface_key
+0000000000326ca8 T _ghostty_surface_key_is_binding
+00000000003305f4 T _ghostty_surface_key_translation_mods
+00000000003225b4 T _ghostty_surface_mouse_button
+0000000000326410 T _ghostty_surface_mouse_captured
+000000000031f3dc T _ghostty_surface_mouse_pos
+000000000031c06c T _ghostty_surface_mouse_pressure
+000000000031ce2c T _ghostty_surface_mouse_scroll
+0000000000343d5c T _ghostty_surface_needs_confirm_quit
+000000000036452c T _ghostty_surface_new
+0000000000326b80 T _ghostty_surface_paste_text
+000000000032650c T _ghostty_surface_preedit
+0000000000343d44 T _ghostty_surface_process_exited
+00000000003ff7d0 T _ghostty_surface_quicklook_font
+00000000003ff60c T _ghostty_surface_quicklook_word
+0000000000343bec T _ghostty_surface_read_selection
+0000000000342db0 T _ghostty_surface_read_text
+0000000000342cac T _ghostty_surface_refresh
+000000000031bd18 T _ghostty_surface_request_close
+0000000000331fe8 T _ghostty_surface_set_color_scheme
+00000000003313d8 T _ghostty_surface_set_content_scale
+00000000003ffdb0 T _ghostty_surface_set_display_id
+00000000003308a4 T _ghostty_surface_set_focus
+ghostty-internal.a stripped bytes=26381592
+VT compare: libghostty-vt.a ~11MB (prior probe). GhosttyLib >> VT-only.

@@ -1,9 +1,5 @@
-# Probe only. Captures whether upstream GhosttyLib (app-runtime=none,
-# emit-lib-vt=false) emits an installable *non-VT* static archive on Darwin.
-#
-# Product path is packages.libghostty-macos (fails closed until this probe
-# is green and Metal surface symbols exist). Do not treat Rust UniFFI
-# alias or libghostty-vt.a as success.
+# Probe: GhosttyLib static on Darwin after Darwin install + prebuilt metallib.
+# Captures build.log. Success = non-VT ghostty-internal.a in zig-out.
 {
   lib,
   stdenv,
@@ -18,9 +14,20 @@
 assert stdenv.hostPlatform.isDarwin;
 stdenv.mkDerivation (finalAttrs: {
   pname = "libghostty-macos-probe";
-  version = "0.1.1-probe";
+  version = "0.1.4-probe";
 
   src = ghosttySrc;
+
+  patches = [
+    ./patches/darwin-install-ghostty-internal-static.patch
+    ./patches/prebuilt-metallib-option.patch
+    ./patches/sdk14-kCVPixelFormatType_30RGB_r210.patch
+  ];
+
+  postPatch = ''
+    mkdir -p vendor
+    cp -f ${./prebuilt/Ghostty.metallib} vendor/Ghostty.metallib
+  '';
 
   deps = callPackage (ghosttySrc + "/build.zig.zon.nix") {
     name = "${finalAttrs.pname}-cache-${finalAttrs.version}";
@@ -38,7 +45,6 @@ stdenv.mkDerivation (finalAttrs: {
   dontSetZigDefaultFlags = true;
   doCheck = false;
 
-  # Full GhosttyLib path. Disable VT-only mode, xcframework, app, docs.
   zigBuildFlags = [
     "--system"
     "${finalAttrs.deps}"
@@ -50,6 +56,7 @@ stdenv.mkDerivation (finalAttrs: {
     "-Demit-macos-app=false"
     "-Demit-docs=false"
     "-Demit-helpgen=false"
+    "-Dprebuilt-metallib=true"
   ];
 
   buildPhase = ''
@@ -62,16 +69,14 @@ stdenv.mkDerivation (finalAttrs: {
     set -e
     echo "EXIT=$rc" | tee -a "$out/build.log"
     {
-      echo "--- zig-out (non-vt archives) ---"
-      find zig-out -type f \( -name '*.a' -o -name '*.dylib' \) 2>/dev/null | head -80 || true
+      echo "--- zig-out archives ---"
+      find zig-out -type f \( -name '*.a' -o -name '*.dylib' \) -exec ls -la {} \; 2>/dev/null | head -80 || true
       echo "--- zig-cache ghostty-internal ---"
       find .zig-cache -name '*ghostty-internal*' 2>/dev/null | head -40 || true
       echo "--- zig-cache libghostty (exclude vt) ---"
       find .zig-cache -name 'libghostty*.a' ! -name '*vt*' 2>/dev/null | head -40 || true
     } | tee -a "$out/build.log"
 
-    # Success only if a non-VT GhosttyLib archive lands in zig-out.
-    # libghostty-vt.a always appears and must not count.
     found=""
     for cand in \
       zig-out/lib/libghostty-internal.a \
@@ -84,24 +89,41 @@ stdenv.mkDerivation (finalAttrs: {
       fi
     done
     if test -z "$found"; then
-      echo "PROBE_FAIL: no GhosttyLib static archive in zig-out (VT-only or Darwin skip-install)." | tee -a "$out/build.log"
-      echo "See docs/METAL-SURFACE.md: Darwin build.zig skips lib_static.install." | tee -a "$out/build.log"
+      echo "PROBE_FAIL: no GhosttyLib static archive in zig-out." | tee -a "$out/build.log"
       exit 1
     fi
-    # Reject accidental VT rename
     if echo "$found" | grep -q 'vt'; then
       echo "PROBE_FAIL: matched VT archive $found" | tee -a "$out/build.log"
       exit 1
     fi
-    echo "PROBE_OK: $found" | tee -a "$out/build.log"
+    size=$(stat -f%z "$found" 2>/dev/null || stat -c%s "$found")
+    echo "PROBE_OK: $found size=$size" | tee -a "$out/build.log"
+    if test "$size" -lt 1000000; then
+      echo "PROBE_FAIL: archive too small ($size bytes); likely incomplete." | tee -a "$out/build.log"
+      exit 1
+    fi
     runHook postBuild
   '';
 
   installPhase = ''
     runHook preInstall
     mkdir -p "$out/lib" "$out/include"
-    cp -f zig-out/lib/libghostty-internal.a "$out/lib/" 2>/dev/null || \
-      cp -f zig-out/lib/libghostty.a "$out/lib/"
+    for cand in \
+      zig-out/lib/libghostty-internal.a \
+      zig-out/lib/libghostty.a \
+      zig-out/lib/ghostty-internal.a
+    do
+      if test -f "$cand"; then
+        cp -f "$cand" "$out/lib/libghostty-internal.a"
+        break
+      fi
+    done
+    test -f "$out/lib/libghostty-internal.a"
+    if test -f zig-out/include/ghostty.h; then
+      cp -f zig-out/include/ghostty.h "$out/include/"
+    elif test -f include/ghostty.h; then
+      cp -f include/ghostty.h "$out/include/"
+    fi
     runHook postInstall
   '';
 })

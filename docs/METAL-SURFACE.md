@@ -12,106 +12,58 @@ atlas.
 | Glyph / GPU paint | Wawona `GhosttyGpuView` (CoreText stamp + MTL atlas) | **Interim.** Plan forbids more atlas patches |
 | PTY / Machines chrome | Wawona L4 | Keep |
 | Nix VT package | `nix build .#libghostty-vt` (re-export) | Green on Darwin |
-| Nix Metal package | `nix build .#libghostty-macos` | **Fails closed** (intentional) |
+| Nix GhosttyLib static | `nix build .#libghostty-macos` | **Phase 5:** real archive (install + prebuilt metallib) |
 
-## Measured inventory (2026-11-03)
+## Measured inventory
 
-| Attr / artifact | What it is | Metal? |
-|-----------------|------------|--------|
-| `wwn-ghostty#libghostty-vt` | Upstream VT staticlib (Zig 0.17, pin `521cf2c5`) | No |
-| `wwn-ghostty#libghostty-macos` | Stub `runCommand` exit 1 | No |
-| `wwn-ghostty#libghostty-macos-probe` | Zig GhosttyLib build attempt + log | Evidence only |
+| Attr / artifact | What it is | Metal paint in Wawona UI? |
+|-----------------|------------|---------------------------|
+| `wwn-ghostty#libghostty-vt` | Upstream VT staticlib (Zig 0.17) | No |
+| `wwn-ghostty#libghostty-macos` | GhosttyLib `ghostty-internal.a` (+ `libghostty.a` alias) | Archive yes; **UI still GhosttyGpu** |
+| `wwn-ghostty#libghostty-macos-probe` | Same flags + `build.log` under `$out` | Evidence |
 | `Terminal` `out/macos/libghostty.a` | Alias of `libwawona_terminal.a` (Rust UniFFI) | No (GhosttyGpu paints) |
-| Ghostty `zig-out/*/libghostty.a` | Same Rust alias / mobile stubs | No |
 
-Upstream `ghostty-org/ghostty` flake packages: **only** `libghostty-vt*`. No
-`GhosttyLib` / Metal package.
+## Phase 5 patches (this repo)
 
-## Hard blockers (exact)
+1. **`nix/patches/darwin-install-ghostty-internal-static.patch`**
+   Lift Darwin skip of `lib_static.install("ghostty-internal.a")` when
+   `-Demit-xcframework=false -Demit-macos-app=false`. Without this, Zig never
+   compiles GhosttyLib on Darwin (`app-runtime=none`).
 
-1. **Upstream flake exports VT only.** Full `GhosttyLib` (`-Dapp-runtime=none`,
-   `src/main_c.zig`) is a Zig step, not a flake package Wawona locks today.
+2. **`nix/patches/prebuilt-metallib-option.patch`** + **`nix/prebuilt/Ghostty.metallib`**
+   Nix sandbox cannot run MetalToolchain (`xcrun metal` → tool not found;
+   cryptex). `-Dprebuilt-metallib=true` copies `vendor/Ghostty.metallib`.
+   Regenerate: `nix/prebuilt/README.md` (needs
+   `xcodebuild -downloadComponent MetalToolchain` on the host once).
 
-2. **Darwin never builds GhosttyLib static into the install graph.** In
-   `build.zig` when `app_runtime == .none` and `!emit_lib_vt`,
-   `GhosttyLib.initStatic` is constructed, but install is gated:
+3. **`nix/patches/sdk14-kCVPixelFormatType_30RGB_r210.patch`**
+   Nix `apple-sdk-14.4` lacks `kCVPixelFormatType_30RGB_r210` (macOS 15+).
+   Patch hardcodes FourCC `'r210'`.
 
-   ```text
-   // We shouldn't have this guard but we don't currently
-   // build on macOS this way ironically so we need to fix that.
-   if (!config.target.result.os.tag.isDarwin()) {
-       lib_static.install("ghostty-internal.a");
-   }
-   ```
+## Remaining blockers (not Phase 5 done)
 
-   Because nothing depends on `lib_static.step` on Darwin, Zig never compiles
-   GhosttyLib. Measured 2026-11-03 (`nix build .#libghostty-macos-probe`):
+1. **Wawona UI still GhosttyGpu.** Do not claim Metal surface wired until tip
+   links `-lghostty` / `ghostty_surface_*` and retires atlas paint.
+2. **Full GhosttyLib rejects iOS** (`Config.zig`: only `-Demit-lib-vt`).
+   Separate iOS 13.0 recipe later.
+3. **Name collision.** Terminal `scripts/build-static.sh` `libghostty.a` is
+   still Rust UniFFI alias. Product Zig archive is
+   `wwn-ghostty#libghostty-macos`.
 
-   ```text
-   EXIT=0
-   --- zig-out (non-vt archives) ---
-   zig-out/lib/libghostty-vt.a
-   zig-out/lib/libghostty-vt.0.1.0.dylib
-   --- zig-cache ghostty-internal ---
-   (empty)
-   PROBE_FAIL: no GhosttyLib static archive in zig-out (VT-only or Darwin skip-install).
-   ```
-
-   Log: `docs/evidence/libghostty-macos-probe-2026-11-03.log`.
-   Darwin product path today is XCFramework / Xcode (`emit-xcframework`), not
-   a lone `libghostty.a`.
-
-3. **Full GhosttyLib rejects iOS.** `Config.zig`:
-
-   ```text
-   iOS is not a supported target for the full Ghostty build;
-   only libghostty-vt supports iOS (-Demit-lib-vt)
-   ```
-
-   Wawona needs static archive at deployment target **13.0**. Published
-   GhosttyKit (iOS 17) is forbidden.
-
-4. **Zig pin / ABI split.** Terminal / libghostty-rs uses Zig **0.17** +
-   Ghostty `521cf2c5` for VT. Rootshell Metal trees historically used Zig
-   **0.16** + GhosttyKit. Do not mix VT and Metal objects from different Zig
-   majors in one link.
-
-5. **Name collision.** `scripts/build-static.sh` copies
-   `libwawona_terminal.a` to `libghostty.a`. That is **not** Zig GhosttyLib.
-   `nix build .#libghostty-macos` must never succeed by shipping that alias.
-
-## Exact next Nix step
+## Prove (Phase 5 green)
 
 ```bash
 cd /Users/8amps/Wawona/Ghostty
-
-# Fail closed product attr (expected exit 1 today):
-nix build .#libghostty-macos
-
-# Capture Zig GhosttyLib attempt + log under result/build.log:
-nix build .#libghostty-macos-probe --keep-failed
-# or after failure: read the keep-failed store path build.log
+nix build .#libghostty-macos -L
+ls -la result/lib/libghostty-internal.a result/lib/libghostty.a
+# Measured 2026-11-03: ~26 MiB stripped archive (pre-strip fat ~144 MiB).
+# VT-only libghostty-vt.a is ~11 MiB. GhosttyLib is larger than VT-only.
+nm result/lib/libghostty-internal.a | rg 'T _ghostty_' | head
 ```
 
-Minimal patch path (same commit as claiming green):
+Evidence: `docs/evidence/libghostty-macos-phase5-proof.txt`.
 
-1. Upstream or Wawona patch: on Darwin, **attach** `lib_static.install(...)`
-   (or `b.getInstallStep().dependOn(lib_static.step)`) when
-   `-Dapp-runtime=none -Demit-xcframework=false`. Lifting the
-   `!isDarwin()` guard is required so Zig actually compiles GhosttyLib.
-2. `nix/libghostty-macos.nix`: real `stdenv.mkDerivation` (mirror
-   `libghostty-vt.nix` flags minus `-Demit-lib-vt`), install `libghostty.a` +
-   trimmed `ghostty_*` headers. Fail if GhosttyKit / iOS 17 markers appear.
-3. Prove: `nm` Metal/renderer symbols; host MTKView / CAMetalLayer presents
-   without `GhosttyGpuView`.
-4. Wawona tip: lazy `-lghostty` + `-Wl,-u,_ghostty_surface_new` (or real
-   GhosttyLib embed symbols). Replace `GhosttyGpuView`.
-5. Separate iOS 13.0 recipe (upstream forbids full GhosttyLib on iOS today).
-6. Delete GhosttyGpu atlas path (plan retire-termgpu).
-
-Until step 4 is green: **TermGpu / GhosttyGpu still owns paint.**
-`libghostty-macos fails closed`. Do not claim Metal libghostty is the product
-path.
+Until Wawona tip swaps paint: **TermGpu / GhosttyGpu still owns paint.**
 
 ## Not this work
 

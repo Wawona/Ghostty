@@ -1,0 +1,103 @@
+warning: ignoring untrusted flake configuration setting 'extra-substituters'.
+Pass '--accept-flake-config' to trust it
+warning: ignoring untrusted flake configuration setting 'extra-trusted-public-keys'.
+Pass '--accept-flake-config' to trust it
+this derivation will be built:
+  /nix/store/hsdhrfvw748ypb76074q8mcplx5xdn8v-libghostty-macos-probe-0.1.2-probe.drv
+building '/nix/store/hsdhrfvw748ypb76074q8mcplx5xdn8v-libghostty-macos-probe-0.1.2-probe.drv'...
+libghostty-macos-probe> Running phase: unpackPhase
+libghostty-macos-probe> unpacking source archive /nix/store/845skyrkk1m00q3sa2x2dv0024yh8j7m-source
+libghostty-macos-probe> source root is source
+libghostty-macos-probe> Running phase: patchPhase
+libghostty-macos-probe> applying patch /nix/store/ynd5sdsnfdxpng0v2akpywjy5fyjy61z-darwin-install-ghostty-internal-static.patch
+libghostty-macos-probe> patching file build.zig
+libghostty-macos-probe> Running phase: updateAutotoolsGnuConfigScriptsPhase
+libghostty-macos-probe> Running phase: buildPhase
+libghostty-macos-probe> install
+libghostty-macos-probe> +- install generated to ghostty-internal.a
+libghostty-macos-probe>    +- libsystem override
+libghostty-macos-probe>       +- libtool ghostty-internal (libghostty-internal-fat.a)
+libghostty-macos-probe>          +- ranlib ghostty-internal #13 (13-libghostty-internal-fat.a)
+libghostty-macos-probe>             +- compile lib ghostty fast aarch64-macos.13.0
+libghostty-macos-probe>                +- metallib Ghostty (Ghostty.metallib)
+libghostty-macos-probe>                   +- metal Ghostty (Ghostty.ir) failure
+libghostty-macos-probe> error: tool 'metal' not found
+libghostty-macos-probe> error: process exited with code 1
+libghostty-macos-probe> failed command: /usr/bin/xcrun -sdk macosx metal -o ./.zig-cache/o/c24ef7107a022d025f18950fdc58de36/Ghostty.ir -c ./src/renderer/shaders/shaders.metal -mmacos-version-min=13.0.0
+libghostty-macos-probe> 
+libghostty-macos-probe> install
+libghostty-macos-probe> +- run /bin/ln
+libghostty-macos-probe>    +- run /bin/ln
+libghostty-macos-probe>       +- install generated to libghostty-vt.0.1.0.dylib
+libghostty-macos-probe>          +- link libghostty-vt with Apple ld (libghostty-vt.0.1.0.dylib) w
+libghostty-macos-probe> Warning: supplying the --target arm64-apple-macosx13.0.0 != arm64-apple-darwin argument to a nix-wrapped compiler may not work correctly - cc-wrapper is currently not designed with multi-target compilers in mind. You may want to use an un-wrapped compiler instead.
+libghostty-macos-probe> clang: warning: overriding '-mmacos-version-min=14.0' option with '-target arm64-apple-macosx13.0.0' [-Woverriding-option]
+libghostty-macos-probe> failed command: /usr/bin/xcrun --sdk macosx clang -fuse-ld=ld -target arm64-apple-macosx13.0.0 -dynamiclib -Wl,-all_load -Wl,-dead_strip -Wl,-headerpad_max_install_names -Wl,-exported_symbols_list,./.zig-cache/o/3d3997c3785b49ebcec56a9c712ce359/libghostty-vt.exports ./.zig-cache/o/47adf8185384426e0289e1a751ecccd5/libghostty-vt-fat.a -install_name @rpath/libghostty-vt.dylib -current_version 0.1.0 -compatibility_version 1.0.0 -o ./.zig-cache/o/b3eb5dad437edc544ddce571cc7e1326/libghostty-vt.0.1.0.dylib
+libghostty-macos-probe> 
+libghostty-macos-probe> Build Summary: 140/148 steps succeeded (1 failed)
+libghostty-macos-probe> install transitive failure
+libghostty-macos-probe> +- install generated to ghostty-internal.a transitive failure
+libghostty-macos-probe>    +- libsystem override transitive failure
+libghostty-macos-probe>       +- libtool ghostty-internal (libghostty-internal-fat.a) transitive failure
+libghostty-macos-probe>          +- ranlib ghostty-internal #13 (13-libghostty-internal-fat.a) transitive failure
+libghostty-macos-probe>          |  +- compile lib ghostty fast aarch64-macos.13.0 transitive failure
+libghostty-macos-probe>          |     +- metallib Ghostty (Ghostty.metallib) transitive failure
+libghostty-macos-probe>          |     |  +- metal Ghostty (Ghostty.ir) failure
+libghostty-macos-probe>          |     |  +- metal Ghostty (Ghostty.ir) (reused)
+libghostty-macos-probe>          |     +- metallib Ghostty (Ghostty.metallib) (+2 more reused dependencies)
+libghostty-macos-probe>          +- compile lib ghostty fast aarch64-macos.13.0 (+87 more reused dependencies)
+libghostty-macos-probe> 
+libghostty-macos-probe> EXIT=1
+libghostty-macos-probe> --- zig-out archives ---
+libghostty-macos-probe> -rw-r--r-- 1 _nixbld1 nixbld 11839448 Nov  4 02:30 zig-out/lib/libghostty-vt.a
+libghostty-macos-probe> -rwxr-xr-x 1 _nixbld1 nixbld 2100064 Nov  4 02:30 zig-out/lib/libghostty-vt.0.1.0.dylib
+libghostty-macos-probe> --- zig-cache ghostty-internal ---
+libghostty-macos-probe> .zig-cache/o/041f9f6a4d258d2effcf12e6506efc60/11-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/0dc1849680002615a318b4c9f358d382/9-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/a7b30b43407299ceb45d1b62049c77b4/0-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/6ab4a2fa4dad1b96196a8b61372276bb/1-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/8a2be2ef4d9b65501cbf8684cde575f0/3-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/5c170eefa6ef5eaff237911e0b37580c/4-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/b8536919cec101e0f2276347cdf9ec14/7-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/09c4554c37191e8852681f4af025ca87/6-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/8b540b94691b291a71f2ca8d56226a2d/12-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/2304dfd17f31b22c7680f4e6e9752c60/10-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/bf73316d3f9e7498d5f3afabded0f963/5-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/c6851608190d275186edd3246b727a44/8-libghostty-internal-fat.a
+libghostty-macos-probe> .zig-cache/o/75d427fa41d049e8928b5c9a57432ca0/2-libghostty-internal-fat.a
+libghostty-macos-probe> --- zig-cache libghostty (exclude vt) ---
+libghostty-macos-probe> PROBE_FAIL: no GhosttyLib static archive in zig-out.
+note: keeping build directory "/nix/var/nix/builds/nix-94757-1402825123"
+❌ git+file:///Users/8amps/Wawona/Ghostty#libghostty-macos-probe
+error: Cannot build '/nix/store/hsdhrfvw748ypb76074q8mcplx5xdn8v-libghostty-macos-probe-0.1.2-probe.drv'.
+       Reason: builder failed with exit code 1.
+       Output paths:
+         /nix/store/nhg9qkbwfb18vdkwbb0cna33vrk18q7w-libghostty-macos-probe-0.1.2-probe
+       Last 25 log lines:
+       >          |     |  +- metal Ghostty (Ghostty.ir) failure
+       >          |     |  +- metal Ghostty (Ghostty.ir) (reused)
+       >          |     +- metallib Ghostty (Ghostty.metallib) (+2 more reused dependencies)
+       >          +- compile lib ghostty fast aarch64-macos.13.0 (+87 more reused dependencies)
+       >
+       > EXIT=1
+       > --- zig-out archives ---
+       > -rw-r--r-- 1 _nixbld1 nixbld 11839448 Nov  4 02:30 zig-out/lib/libghostty-vt.a
+       > -rwxr-xr-x 1 _nixbld1 nixbld 2100064 Nov  4 02:30 zig-out/lib/libghostty-vt.0.1.0.dylib
+       > --- zig-cache ghostty-internal ---
+       > .zig-cache/o/041f9f6a4d258d2effcf12e6506efc60/11-libghostty-internal-fat.a
+       > .zig-cache/o/0dc1849680002615a318b4c9f358d382/9-libghostty-internal-fat.a
+       > .zig-cache/o/a7b30b43407299ceb45d1b62049c77b4/0-libghostty-internal-fat.a
+       > .zig-cache/o/6ab4a2fa4dad1b96196a8b61372276bb/1-libghostty-internal-fat.a
+       > .zig-cache/o/8a2be2ef4d9b65501cbf8684cde575f0/3-libghostty-internal-fat.a
+       > .zig-cache/o/5c170eefa6ef5eaff237911e0b37580c/4-libghostty-internal-fat.a
+       > .zig-cache/o/b8536919cec101e0f2276347cdf9ec14/7-libghostty-internal-fat.a
+       > .zig-cache/o/09c4554c37191e8852681f4af025ca87/6-libghostty-internal-fat.a
+       > .zig-cache/o/8b540b94691b291a71f2ca8d56226a2d/12-libghostty-internal-fat.a
+       > .zig-cache/o/2304dfd17f31b22c7680f4e6e9752c60/10-libghostty-internal-fat.a
+       > .zig-cache/o/bf73316d3f9e7498d5f3afabded0f963/5-libghostty-internal-fat.a
+       > .zig-cache/o/c6851608190d275186edd3246b727a44/8-libghostty-internal-fat.a
+       > .zig-cache/o/75d427fa41d049e8928b5c9a57432ca0/2-libghostty-internal-fat.a
+       > --- zig-cache libghostty (exclude vt) ---
+       > PROBE_FAIL: no GhosttyLib static archive in zig-out.
+       For full logs, run:
+         nix log /nix/store/hsdhrfvw748ypb76074q8mcplx5xdn8v-libghostty-macos-probe-0.1.2-probe.drv
